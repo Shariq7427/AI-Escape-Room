@@ -1,0 +1,45 @@
+{
+  "intro": "You wake up on a cold wooden floor in a dusty library. The door is locked with a four-digit code. You see a desk, a bookshelf, a painting and a locked drawer.\n\n**How to play:** type what you want to do, e.g. *'examine the bookshelf'* or *'try 1234 on the door'*. The sidebar shows your inventory and lets you restart.",
+  "objects": {
+    "desk": {"aliases": ["desk", "table", "lamp"]},
+    "bookshelf": {"aliases": ["bookshelf", "shelf", "bookcase", "book"]},
+    "painting": {"aliases": ["painting", "picture", "frame", "portrait", "landscape"]},
+    "drawer": {"aliases": ["drawer"]},
+    "door": {"aliases": ["door", "keypad", "exit"]}
+  },
+  "items": {
+    "brass key": {"aliases": ["key", "brass key"]}
+  },
+  "solutions": {
+    "drawer_code": "3719",
+    "door_code": "6284"
+  },
+  "texts": {
+    "desk": "A worn oak desk. Under a dusty lamp lies a note: 'Only the books bound in red matter.'",
+    "bookshelf": "Four red-spined books stand out from the rest. Each has a single handwritten digit inside: 3, 7, 1 and 9, in shelf order.",
+    "drawer_locked": "A small drawer with a four-digit combination lock. It is locked.",
+    "drawer_open_key": "The drawer is open. Inside are a small brass key and a torn note: 'The frame remembers what the eyes forget.'",
+    "drawer_open_empty": "The drawer is open. Only a torn note remains: 'The frame remembers what the eyes forget.'",
+    "painting_locked": "A landscape painting. Its frame has a small locked compartment with a keyhole.",
+    "painting_open": "The frame's compartment is open. A card inside shows the number 6284.",
+    "door": "A heavy oak door with a four-digit keypad. It is locked.",
+    "key_item": "A small brass key, the right size for a tiny keyhole.",
+    "drawer_unlocked": "The combination is correct and the drawer clicks open. Inside are a small brass key and a torn note: 'The frame remembers what the eyes forget.'",
+    "drawer_already_open": "The drawer is already open.",
+    "wrong_code": "The lock does not open. That combination is wrong.",
+    "no_code": "No four-digit code was given.",
+    "took_key": "The player picks up the small brass key and puts it in their inventory.",
+    "have_key": "The player already has the brass key.",
+    "cannot_take": "There is nothing like that to pick up right now.",
+    "no_item": "The player does not have that item.",
+    "key_opens_painting": "The brass key turns in the frame's keyhole and the compartment opens. A card inside shows the number 6284.",
+    "painting_already_open": "The compartment in the frame is already open.",
+    "nothing_happens": "Nothing happens.",
+    "escaped": "The keypad accepts the code, the lock clicks and the door swings open. The player escapes the library.",
+    "door_wrong": "The keypad buzzes and flashes red. The door stays locked.",
+    "unknown_object": "There is no such object in the room. The room contains: a desk, a bookshelf, a painting, a drawer and a door.",
+    "invalid": "That request cannot be done inside the game, so nothing changes. The player must act through the room's objects.",
+    "game_over": "The player has already escaped. The game is over.",
+    "help": "The player can examine objects, pick things up, try four-digit codes on locks and use items they carry."
+  }
+}
