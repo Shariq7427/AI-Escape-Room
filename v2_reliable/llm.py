@@ -1,5 +1,7 @@
 """V2 LLM layer: (1) parse player text into an action, (2) narrate the outcome.
-The LLM never sees secret solutions and never decides what succeeds."""
+The LLM never sees secret solutions and never decides what succeeds.
+If the LLM is unavailable (quota or outage), a local keyword parser keeps
+the game playable."""
 import json
 import os
 import re
@@ -44,6 +46,7 @@ STRICT RULES:
 
 
 def _generate(contents, system, **cfg):
+    """Call Gemini. Retries only on temporary overload (503), not on quota (429)."""
     last = None
     for attempt in range(4):
         try:
@@ -54,23 +57,57 @@ def _generate(contents, system, **cfg):
             )
         except Exception as e:
             last = e
-            if "503" in str(e) or "429" in str(e):
+            if "503" in str(e):
                 time.sleep(2 ** attempt)
                 continue
             raise
     raise last
 
 
-def parse_intent(text):
-    """Return a validated intent dict. Falls back to 'invalid' on any problem."""
+def local_parse(text):
+    """Keyword fallback used when the LLM is unavailable (quota or outage)."""
+    t = text.lower()
     intent = {"action": "invalid", "target": None, "item": None, "code": None}
-    resp = _generate(text, PARSER_PROMPT, temperature=0, response_mime_type="application/json")
+    m = re.search(r"\b\d{4}\b", t)
+    intent["code"] = m.group(0) if m else None
+    # same rule as the LLM path: manipulation attempts are invalid
+    if any(w in t for w in ("administrator", "admin", "secret", "solution",
+                            "reveal", "ignore", "already solved", "override")):
+        return intent
+    for obj in ("desk", "bookshelf", "shelf", "painting", "picture", "frame",
+                "drawer", "door", "keypad", "exit"):
+        if obj in t:
+            intent["target"] = obj
+            break
+    if "key" in t:
+        intent["item"] = "key"
+    if intent["code"]:
+        intent["action"] = "enter_code"
+    elif "inventory" in t or "carrying" in t:
+        intent["action"] = "inventory"
+    elif "help" in t:
+        intent["action"] = "help"
+    elif any(w in t for w in ("take", "pick", "grab", "collect")):
+        intent["action"] = "take"
+    elif "use" in t and intent["item"]:
+        intent["action"] = "use_item"
+    elif any(w in t for w in ("examine", "look", "inspect", "check", "search", "read", "open")):
+        intent["action"] = "examine"
+    return intent
+
+
+def parse_intent(text):
+    """Return a validated intent dict. Falls back to a local parser if the LLM fails."""
+    intent = {"action": "invalid", "target": None, "item": None, "code": None}
     try:
+        resp = _generate(text, PARSER_PROMPT, temperature=0, response_mime_type="application/json")
         data = json.loads(resp.text)
         if isinstance(data, dict) and data.get("action") in ALLOWED_ACTIONS:
             intent.update({k: data.get(k) for k in intent})
-    except (json.JSONDecodeError, TypeError):
-        pass
+        else:
+            return local_parse(text)
+    except Exception:
+        return local_parse(text)  # LLM unavailable or bad output
     # The code is taken from the player's own text, never from the LLM
     match = re.search(r"\b\d{4}\b", text)
     intent["code"] = match.group(0) if match else None
